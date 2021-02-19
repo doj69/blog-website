@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("partials/header") -%>
+  <body>
+    <div class="container">
+      <h1><%= heading %></h1>
+      <p><%= content %></p>
+
+      <% if (journals.length > 0) { %>
+      <div class="row">
+        <% journals.forEach((element, index) => { %>
+        <div class="col-sm-6 col-md-4">
+          <div class="thumbnail">
+            <div class="caption">
+              <h3><%= element.title %></h3>
+              <p>
+                <%= element.content.length < 100 ? element.content :
+                `${element.content.slice(0,100)}...`%>
+              </p>
+              <p class="text-right">
+                <a
+                  href="<%= `/journal/${index}` %> "
+                  class="btn btn-sm btn-primary"
+                  role="button"
+                  >See More..</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </body>
+  <%- include("partials/footer") -%>
+</html>
