@@ -1,4 +1,4 @@
-# newsletter-signup
+# Daily Journal Website
 
 Daily Journal Website using express, ejs, bootstrap, body-parser..
 
