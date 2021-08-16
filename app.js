@@ -1,5 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const model = require("./controller/helper/mongoUtil");
+const { render } = require("ejs");
 
 //Constant variable
 const port = process.env.PORT || 3000;
@@ -19,18 +21,16 @@ let journals = [];
 //Set the config
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }), express.static("public"));
+app.use(express.urlencoded({ extended: true }), express.static("public"));
 
 app.set("view engine", "ejs");
 
 //Dynamic Item List Type Route
 route.forEach((element) => {
-  let contentType;
   let pathName =
     element === "/" ? "HOME" : element.replace("/", "").toUpperCase();
   switch (element) {
     case "/":
-      contentType = homeStartingContent;
       break;
     case "/about":
       contentType = aboutContent;
@@ -41,13 +41,40 @@ route.forEach((element) => {
     default:
       break;
   }
-  app.get(element, (req, res) => {
-    res.render(pathName, {
-      content: contentType,
-      heading: pathName,
-      route: element,
+});
+
+app.get("/", (req, res) => {
+  model.Publish.findAll((result) => {
+    if (result.length > 0) {
+      journals = result;
+    }
+    res.render("home", {
+      content: homeStartingContent,
+      heading: "HOME",
+      route: "/",
       journals: journals,
     });
+  });
+});
+app.get("/about", (req, res) => {
+  res.render("about", {
+    content: aboutContent,
+    heading: "ABOUT",
+    route: "/About",
+  });
+});
+app.get("/contact", (req, res) => {
+  res.render("contact", {
+    content: contactContent,
+    heading: "CONTACT",
+    route: "/Contact",
+  });
+});
+
+app.get("/compose", (req, res) => {
+  res.render("compose", {
+    heading: "COMPOSE",
+    route: "/Compose",
   });
 });
 
@@ -56,15 +83,19 @@ app.post("/compose", (req, res) => {
     title: req.body.postTitle,
     content: req.body.postText,
   };
-  journals.push(post);
-  res.redirect("/");
+  if (post !== null) {
+    model.Publish.add(post);
+    res.redirect("/");
+  }
 });
 
 app.get("/journal/:id", (req, res) => {
   let id = req.params.id;
-  let data = journals[id];
-
-  res.render("post", { heading: data.title, content: data.content });
+  model.Publish.findById(id, (data) => {
+    if (data !== "") {
+      res.render("post", { heading: data.title, content: data.content });
+    }
+  });
 });
 
 app.listen(port, () => {
